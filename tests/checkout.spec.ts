@@ -1,23 +1,18 @@
 import { test, expect } from '@playwright/test';
+import { login } from '../helpers/test-helpers';
+import { completeCheckoutInformation } from '../helpers/test-helpers';
 
 test.describe('Checkout', () => {
     // Login with to Product Page before each test
     test.beforeEach(async ({ page }) => {
         await page.goto('https://www.saucedemo.com/');
-        await page.getByPlaceholder('Username').fill('standard_user');
-        await page.getByPlaceholder('Password').fill('secret_sauce');
-        await page.getByRole('button', { name: 'Login' }).click();
+        await login(page, 'standard_user', 'secret_sauce');
     });
 
     test('Checkout with no items shows correct $0.00 totals', async ({ page }) => {
         await page.locator('[data-test="shopping-cart-link"]').click();
 
-        // Fill in user information
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
 
         await expect(page.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $0');
         await expect(page.locator('[data-test="tax-label"]')).toHaveText('Tax: $0.00');
@@ -30,12 +25,7 @@ test.describe('Checkout', () => {
 
         await page.locator('[data-test="shopping-cart-link"]').click();
 
-        // Fill in user information
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
 
         // Tax rate is flat 8% regardless of user information
         await expect(page.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $29.99');
@@ -50,12 +40,7 @@ test.describe('Checkout', () => {
 
         await page.locator('[data-test="shopping-cart-link"]').click();
 
-        // Fill in user information
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
 
         // Tax rate is flat 8% regardless of user information
         await expect(page.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $39.98');
@@ -71,12 +56,7 @@ test.describe('Checkout', () => {
 
         await page.locator('[data-test="shopping-cart-link"]').click();
 
-        // Fill in user information
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
 
         // Tax rate is flat 8% regardless of user information
         await expect(page.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $55.97');
@@ -156,11 +136,7 @@ test.describe('Checkout', () => {
 
         // Reach Checkout and click Cancel
         await page.locator('[data-test="shopping-cart-link"]').click();
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
         await page.locator('[data-test="cancel"]').click();
 
         // Check that we are back to the Products page
@@ -179,11 +155,7 @@ test.describe('Checkout', () => {
 
         // Reach Checkout
         await page.locator('[data-test="shopping-cart-link"]').click();
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
 
         // Confirm Checkout item details matches the Product page details
         await expect(page.locator('[data-test="inventory-item-name"]')).toHaveText(productName);
@@ -197,11 +169,7 @@ test.describe('Checkout', () => {
         await page.locator('[data-test="shopping-cart-link"]').click();
 
         // Fill in user information and continue to Checkout Page
-        await page.locator('[data-test="checkout"]').click();
-        await page.locator('[data-test="firstName"]').fill('Test');
-        await page.locator('[data-test="lastName"]').fill('User');
-        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await page.locator('[data-test="continue"]').click();
+        await completeCheckoutInformation(page);
 
         // Finish checkout
         await page.locator('[data-test="finish"]').click();

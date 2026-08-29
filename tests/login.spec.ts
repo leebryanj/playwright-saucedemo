@@ -1,11 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
-
-// Login helper function
-async function login(page: Page, username: string, password: string) {
-  await page.getByPlaceholder('Username').fill(username);
-  await page.getByPlaceholder('Password').fill(password);
-  await page.getByRole('button', { name: 'Login' }).click();
-}
+import { test, expect } from '@playwright/test';
+import { login } from '../helpers/test-helpers';
 
 test.describe('Login', () => {
 

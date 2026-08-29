@@ -63,7 +63,7 @@ test.describe('Checkout', () => {
         await expect(page.locator('[data-test="total-label"]')).toHaveText('Total: $43.18');
     });
 
-    test('Checkout with multiple items shows correct total', async ({ page }) => {
+    test('Checkout with three items shows correct total', async ({ page }) => {
         // Add 3 items to cart
         await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
         await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
@@ -92,7 +92,7 @@ test.describe('Checkout', () => {
         // Leave all fields blank and click continue button
         await page.locator('[data-test="continue"]').click();
 
-        // Shows the error message for first field left blank
+        // Shows the error message
         await expect(page.locator('[data-test="error"]')).toHaveText('Error: First Name is required');
     });
 
@@ -106,7 +106,7 @@ test.describe('Checkout', () => {
         await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
         await page.locator('[data-test="continue"]').click();
 
-        // Shows the error message for first field left blank
+        // Shows the error message for first name left blank
         await expect(page.locator('[data-test="error"]')).toHaveText('Error: First Name is required');
     });
 
@@ -120,7 +120,7 @@ test.describe('Checkout', () => {
         await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
         await page.locator('[data-test="continue"]').click();
 
-        // Shows the error message for first field left blank
+        // Shows the error message for last name left blank
         await expect(page.locator('[data-test="error"]')).toHaveText('Error: Last Name is required');
     });
 
@@ -134,11 +134,11 @@ test.describe('Checkout', () => {
         await page.locator('[data-test="lastName"]').fill('User');
         await page.locator('[data-test="continue"]').click();
 
-        // Shows the error message for first field left blank
+        // Shows the error message for postal code left blank
         await expect(page.locator('[data-test="error"]')).toHaveText('Error: Postal Code is required');
     });
 
-    test('Clicking cancel in checkout takes user back to Product page', async ({ page }) => {
+    test('Clicking cancel in Your Information page takes user back to Cart page', async ({ page }) => {
         // Reach the Checkout Your Information page
         await page.locator('[data-test="shopping-cart-link"]').click();
         await page.locator('[data-test="checkout"]').click();
@@ -150,7 +150,24 @@ test.describe('Checkout', () => {
         await expect(page.locator('[data-test="title"]')).toHaveText('Your Cart');
     });
 
-    test('Checkout page shows correct item list', async ({ page }) => {
+    test('Clicking cancel in Checkout Overview page takes user back to Product page', async ({ page }) => {
+        // Add that item to cart
+        await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+
+        // Reach Checkout and click Cancel
+        await page.locator('[data-test="shopping-cart-link"]').click();
+        await page.locator('[data-test="checkout"]').click();
+        await page.locator('[data-test="firstName"]').fill('Test');
+        await page.locator('[data-test="lastName"]').fill('User');
+        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
+        await page.locator('[data-test="continue"]').click();
+        await page.locator('[data-test="cancel"]').click();
+
+        // Check that we are back to the Products page
+        await expect(page.locator('[data-test="title"]')).toHaveText('Products');
+    });
+
+    test('Checkout displays product information matching Product page', async ({ page }) => {
         // Add an item to Cart and save product information
         const sauceLabsBackpack = page.locator('[data-test="inventory-item"]').filter({ hasText: 'Sauce Labs Backpack' });
         const productName = await sauceLabsBackpack.locator('[data-test="inventory-item-name"]').innerText();
@@ -172,5 +189,25 @@ test.describe('Checkout', () => {
         await expect(page.locator('[data-test="inventory-item-name"]')).toHaveText(productName);
         await expect(page.locator('[data-test="inventory-item-desc"]')).toHaveText(productDescription);
         await expect(page.locator('[data-test="inventory-item-price"]')).toHaveText(productPrice);
+    });
+
+    test('User can checkout successfully and complete an order', async ({ page }) => {
+        // Add item to cart and go to Cart page
+        await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        await page.locator('[data-test="shopping-cart-link"]').click();
+
+        // Fill in user information and continue to Checkout Page
+        await page.locator('[data-test="checkout"]').click();
+        await page.locator('[data-test="firstName"]').fill('Test');
+        await page.locator('[data-test="lastName"]').fill('User');
+        await page.locator('[data-test="postalCode"]').fill('A1A 1A1');
+        await page.locator('[data-test="continue"]').click();
+
+        // Finish checkout
+        await page.locator('[data-test="finish"]').click();
+
+        await expect(page.locator('[data-test="title"]')).toHaveText('Checkout: Complete!');
+        await expect(page.locator('[data-test="complete-header"]')).toHaveText('Thank you for your order!');
+        await expect(page.locator('[data-test="pony-express"]')).toBeVisible();
     });
 });

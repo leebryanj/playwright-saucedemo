@@ -1,27 +1,21 @@
-import { test, expect } from '@playwright/test';
+import { test } from '../fixtures/fixtures';
+import { expect } from '@playwright/test';
 import { login } from '../helpers/test-helpers';
 
 test.describe('Login', () => {
 
-  // Start at the login page
-  test.beforeEach(async ({ page }) => {
-    await page.goto('https://www.saucedemo.com/');
-  });
-
   test('has title on login page', async ({ page }) => {
-    // Expect title to have Swag Labs substring
+    await page.goto('https://www.saucedemo.com/');
     await expect(page).toHaveTitle(/Swag Labs/);
   });
 
-  test('successful login with standard user', async ({ page }) => {
-    await login(page, 'standard_user', 'secret_sauce');
-
-    // Expects page to have updated URL and title with text 'Products'
-    await expect(page).toHaveURL(/inventory/);
-    await expect(page.locator('[data-test="title"]')).toHaveText('Products');
+  test('successful login with standard user', async ({ loggedInPage }) => {
+    await expect(loggedInPage).toHaveURL(/inventory/);
+    await expect(loggedInPage.locator('[data-test="title"]')).toHaveText('Products');
   });
 
   test('login fails with correct username and incorrect password', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
     await login(page, 'standard_user', 'abc123');
 
     // Both username and password fields display an error svg
@@ -34,18 +28,21 @@ test.describe('Login', () => {
   });
 
   test('login fails with invalid username and correct password', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
     await login(page, 'not_a_user', 'secret_sauce');
 
     await expect(page.getByText('Epic sadface: Username and password do not match any user in this service')).toBeVisible();
   });
 
   test('login fails with locked out user', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
     await login(page, 'locked_out_user', 'secret_sauce');
 
     await expect(page.getByText('Epic sadface: Sorry, this user has been locked out.')).toBeVisible();
   });
 
   test('login fails with empty username', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
     await login(page, '', 'secret_sauce');
 
     // Username input field is still empty
@@ -54,6 +51,7 @@ test.describe('Login', () => {
   });
 
   test('login fails with empty password', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
     await login(page, 'standard_user', '');
 
     await expect(page.getByPlaceholder('Password')).toHaveValue('');
@@ -61,6 +59,7 @@ test.describe('Login', () => {
   });
 
   test('clicking "x" on error message toast removes error state', async ({ page }) => {
+    await page.goto('https://www.saucedemo.com/');
     await login(page, 'standard_user', '');
 
     // Check that error toast is present

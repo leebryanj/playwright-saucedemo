@@ -1,36 +1,31 @@
-import { test, expect } from '@playwright/test';
+import { test } from '../fixtures/fixtures';
+import { expect } from '@playwright/test';
 import { login } from '../helpers/test-helpers';
 
 test.describe('Product Page', () => {
-    // Login with to Product Page before each test
-    test.beforeEach(async ({ page }) => {
-        await page.goto('https://www.saucedemo.com/');
-        await login(page, 'standard_user', 'secret_sauce');
+    test('Products title appears on page', async ({ loggedInPage }) => {
+        await expect(loggedInPage.locator('[data-test="title"]')).toHaveText('Products');
     });
 
-    test('Products title appears on page', async ({ page }) => {
-        await expect(page.locator('[data-test="title"]')).toHaveText('Products');
+    test('Shopping cart link appears on page', async ({ loggedInPage }) => {
+        await expect(loggedInPage.locator('[data-test="shopping-cart-link"]')).toBeVisible();
     });
 
-    test('Shopping cart link appears on page', async ({ page }) => {
-        await expect(page.locator('[data-test="shopping-cart-link"]')).toBeVisible();
+    test('Sorting dropdown appears on page', async ({ loggedInPage }) => {
+        await expect(loggedInPage.locator('[data-test="product-sort-container"]')).toBeVisible();
     });
 
-    test('Sorting dropdown appears on page', async ({ page }) => {
-        await expect(page.locator('[data-test="product-sort-container"]')).toBeVisible();
+    test('Inventory list appears on page', async ({ loggedInPage }) => {
+        await expect(loggedInPage.locator('[data-test="inventory-list"]')).toBeVisible();
     });
 
-    test('Inventory list appears on page', async ({ page }) => {
-        await expect(page.locator('[data-test="inventory-list"]')).toBeVisible();
-    });
-
-    test('Product page should display all six inventory items', async ({ page }) => {
+    test('Product page should display all six inventory items', async ({ loggedInPage }) => {
         // SauceDemo has a permanent fixed list of 6 items
-        await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(6);
+        await expect(loggedInPage.locator('[data-test="inventory-item"]')).toHaveCount(6);
     });
 
-    test('All correct product names are displayed', async ({ page }) => {
-        const productNames = page.locator('[data-test="inventory-item-name"]');
+    test('All correct product names are displayed', async ({ loggedInPage }) => {
+        const productNames = loggedInPage.locator('[data-test="inventory-item-name"]');
 
         await expect(productNames).toHaveText([
             'Sauce Labs Backpack',
@@ -42,8 +37,8 @@ test.describe('Product Page', () => {
         ]);
     });
 
-    test('All correct product prices are dispalyed', async ({ page }) => {
-        const productPrices = page.locator('[data-test="inventory-item-price"]');
+    test('All correct product prices are dispalyed', async ({ loggedInPage }) => {
+        const productPrices = loggedInPage.locator('[data-test="inventory-item-price"]');
 
         await expect(productPrices).toHaveText([
             '$29.99',
@@ -55,10 +50,10 @@ test.describe('Product Page', () => {
         ]);
     });
 
-    test('Products can be sorted from A to Z', async ({ page }) => {
-        await page.locator('[data-test="product-sort-container"]').selectOption('az');
+    test('Products can be sorted from A to Z', async ({ loggedInPage }) => {
+        await loggedInPage.locator('[data-test="product-sort-container"]').selectOption('az');
 
-        const productNames = page.locator('[data-test="inventory-item-name"]');
+        const productNames = loggedInPage.locator('[data-test="inventory-item-name"]');
 
         await expect(productNames).toHaveText([
             'Sauce Labs Backpack',
@@ -70,10 +65,10 @@ test.describe('Product Page', () => {
         ]);
     });
 
-    test('Products can be sorted from Z to A', async ({ page }) => {
-        await page.locator('[data-test="product-sort-container"]').selectOption('za');
+    test('Products can be sorted from Z to A', async ({ loggedInPage }) => {
+        await loggedInPage.locator('[data-test="product-sort-container"]').selectOption('za');
 
-        const productNames = page.locator('[data-test="inventory-item-name"]');
+        const productNames = loggedInPage.locator('[data-test="inventory-item-name"]');
 
         await expect(productNames).toHaveText([
             'Test.allTheThings() T-Shirt (Red)',
@@ -85,10 +80,10 @@ test.describe('Product Page', () => {
         ]);
     });
 
-    test('Products can be sorted by price from low to hi', async ({ page }) => {
-        await page.locator('[data-test="product-sort-container"]').selectOption('lohi');
+    test('Products can be sorted by price from low to hi', async ({ loggedInPage }) => {
+        await loggedInPage.locator('[data-test="product-sort-container"]').selectOption('lohi');
 
-        const productNames = page.locator('[data-test="inventory-item-name"]');
+        const productNames = loggedInPage.locator('[data-test="inventory-item-name"]');
 
         await expect(productNames).toHaveText([
             'Sauce Labs Onesie',
@@ -100,10 +95,10 @@ test.describe('Product Page', () => {
         ]);
     });
 
-    test('Products can be sorted by price from hi to low', async ({ page }) => {
-        await page.locator('[data-test="product-sort-container"]').selectOption('hilo');
+    test('Products can be sorted by price from hi to low', async ({ loggedInPage }) => {
+        await loggedInPage.locator('[data-test="product-sort-container"]').selectOption('hilo');
 
-        const productNames = page.locator('[data-test="inventory-item-name"]');
+        const productNames = loggedInPage.locator('[data-test="inventory-item-name"]');
 
         await expect(productNames).toHaveText([
             'Sauce Labs Fleece Jacket',

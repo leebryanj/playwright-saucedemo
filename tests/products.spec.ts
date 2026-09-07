@@ -1,6 +1,5 @@
 import { test } from '../fixtures/fixtures';
 import { expect } from '@playwright/test';
-import { login } from '../helpers/test-helpers';
 
 test.describe('Product Page', () => {
     test('Products title appears on page', async ({ loggedInPage }) => {

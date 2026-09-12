@@ -1,176 +1,224 @@
 import { test } from '../fixtures/fixtures';
 import { expect } from '@playwright/test';
-import { completeCheckoutInformation } from '../helpers/test-helpers';
+import { CheckoutPage } from '../pages/checkout-page';
+import { CartPage } from '../pages/cart-page';
+import { ProductsPage } from '../pages/products-page';
 
 test.describe('Checkout', () => {
 
     test('Checkout with no items shows correct $0.00 totals', async ({ loggedInPage }) => {
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
 
-        await completeCheckoutInformation(loggedInPage);
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
-        await expect(loggedInPage.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $0');
-        await expect(loggedInPage.locator('[data-test="tax-label"]')).toHaveText('Tax: $0.00');
-        await expect(loggedInPage.locator('[data-test="total-label"]')).toHaveText('Total: $0.00');
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
+
+        await expect(checkoutPage.subtotalLabel).toHaveText('Item total: $0');
+        await expect(checkoutPage.taxLabel).toHaveText('Tax: $0.00');
+        await expect(checkoutPage.totalLabel).toHaveText('Total: $0.00');
     });
 
     test('Checkout with single item shows correct total', async ({ loggedInPage }) => {
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+        const productsPage = new ProductsPage(loggedInPage);
+
         // Add 1 item to cart
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        await productsPage.addBackpackToCart();
 
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
+        await cartPage.openCart();
 
-        await completeCheckoutInformation(loggedInPage);
+        await cartPage.startCheckout();
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
 
         // Tax rate is flat 8% regardless of user information
-        await expect(loggedInPage.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $29.99');
-        await expect(loggedInPage.locator('[data-test="tax-label"]')).toHaveText('Tax: $2.40');
-        await expect(loggedInPage.locator('[data-test="total-label"]')).toHaveText('Total: $32.39');
+        await expect(checkoutPage.subtotalLabel).toHaveText('Item total: $29.99');
+        await expect(checkoutPage.taxLabel).toHaveText('Tax: $2.40');
+        await expect(checkoutPage.totalLabel).toHaveText('Total: $32.39');
     });
 
     test('Checkout with two items shows correct total', async ({ loggedInPage }) => {
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+        const productsPage = new ProductsPage(loggedInPage);
         // Add 2 items to cart
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
+        await productsPage.addBackpackToCart();
+        await productsPage.addBikeLightToCart();
 
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
+        await cartPage.openCart();
 
-        await completeCheckoutInformation(loggedInPage);
+        await cartPage.startCheckout();
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
 
         // Tax rate is flat 8% regardless of user information
-        await expect(loggedInPage.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $39.98');
-        await expect(loggedInPage.locator('[data-test="tax-label"]')).toHaveText('Tax: $3.20');
-        await expect(loggedInPage.locator('[data-test="total-label"]')).toHaveText('Total: $43.18');
+        await expect(checkoutPage.subtotalLabel).toHaveText('Item total: $39.98');
+        await expect(checkoutPage.taxLabel).toHaveText('Tax: $3.20');
+        await expect(checkoutPage.totalLabel).toHaveText('Total: $43.18');
     });
 
     test('Checkout with three items shows correct total', async ({ loggedInPage }) => {
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+        const productsPage = new ProductsPage(loggedInPage);
         // Add 3 items to cart
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-bolt-t-shirt"]').click();
+        await productsPage.addBackpackToCart();
+        await productsPage.addBikeLightToCart();
+        await productsPage.addBoltTShirtToCart();
 
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
+        await cartPage.openCart();
 
-        await completeCheckoutInformation(loggedInPage);
+        await cartPage.startCheckout();
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
 
         // Tax rate is flat 8% regardless of user information
-        await expect(loggedInPage.locator('[data-test="subtotal-label"]')).toHaveText('Item total: $55.97');
-        await expect(loggedInPage.locator('[data-test="tax-label"]')).toHaveText('Tax: $4.48');
-        await expect(loggedInPage.locator('[data-test="total-label"]')).toHaveText('Total: $60.45');
+        await expect(checkoutPage.subtotalLabel).toHaveText('Item total: $55.97');
+        await expect(checkoutPage.taxLabel).toHaveText('Tax: $4.48');
+        await expect(checkoutPage.totalLabel).toHaveText('Total: $60.45');
     });
 
     test('Leaving all fields blank shows correct error', async ({ loggedInPage }) => {
-        // Reach the Checkout Your Information loggedInPage
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await loggedInPage.locator('[data-test="checkout"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
         // Leave all fields blank and click continue button
-        await loggedInPage.locator('[data-test="continue"]').click();
+        await checkoutPage.continueToOverview();
 
         // Shows the error message
-        await expect(loggedInPage.locator('[data-test="error"]')).toHaveText('Error: First Name is required');
+        await expect(checkoutPage.errorMessage)
+            .toHaveText('Error: First Name is required');
     });
 
     test('Leaving first name field blank shows correct error', async ({ loggedInPage }) => {
-        // Reach the Checkout Your Information loggedInPage
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await loggedInPage.locator('[data-test="checkout"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
         // Fill in fields except First Name and click continue button
-        await loggedInPage.locator('[data-test="lastName"]').fill('User');
-        await loggedInPage.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await loggedInPage.locator('[data-test="continue"]').click();
+        await checkoutPage.lastName.fill('User');
+        await checkoutPage.postalCode.fill('A1A 1A1');
+        await checkoutPage.continueToOverview();
 
-        // Shows the error message for first name left blank
-        await expect(loggedInPage.locator('[data-test="error"]')).toHaveText('Error: First Name is required');
+        await expect(checkoutPage.errorMessage)
+            .toHaveText('Error: First Name is required');
     });
 
     test('Leaving last name field blank shows correct error', async ({ loggedInPage }) => {
-        // Reach the Checkout Your Information loggedInPage
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await loggedInPage.locator('[data-test="checkout"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
         // Fill in fields except Last Name and click continue button
-        await loggedInPage.locator('[data-test="firstName"]').fill('Test');
-        await loggedInPage.locator('[data-test="postalCode"]').fill('A1A 1A1');
-        await loggedInPage.locator('[data-test="continue"]').click();
+        await checkoutPage.firstName.fill('Test');
+        await checkoutPage.postalCode.fill('A1A 1A1');
+        await checkoutPage.continueToOverview();
 
         // Shows the error message for last name left blank
-        await expect(loggedInPage.locator('[data-test="error"]')).toHaveText('Error: Last Name is required');
+        await expect(checkoutPage.errorMessage).toHaveText('Error: Last Name is required');
     });
 
     test('Leaving zip/postal code field blank shows correct error', async ({ loggedInPage }) => {
-        // Reach the Checkout Your Information loggedInPage
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await loggedInPage.locator('[data-test="checkout"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
 
-        // Fill in fields except Last Name and click continue button
-        await loggedInPage.locator('[data-test="firstName"]').fill('Test');
-        await loggedInPage.locator('[data-test="lastName"]').fill('User');
-        await loggedInPage.locator('[data-test="continue"]').click();
+        await cartPage.openCart();
+        await cartPage.startCheckout();
+
+        await checkoutPage.firstName.fill('Test');
+        await checkoutPage.lastName.fill('User');
+        await checkoutPage.continueToOverview();
 
         // Shows the error message for postal code left blank
-        await expect(loggedInPage.locator('[data-test="error"]')).toHaveText('Error: Postal Code is required');
+        await expect(checkoutPage.errorMessage).toHaveText('Error: Postal Code is required');
     });
 
     test('Clicking cancel in Your Information page takes user back to Cart page', async ({ loggedInPage }) => {
-        // Reach the Checkout Your Information loggedInPage
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await loggedInPage.locator('[data-test="checkout"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
 
-        // Click the cancel button
-        await loggedInPage.locator('[data-test="cancel"]').click();
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
-        // Check that we are back to the Your Cart loggedInPage
-        await expect(loggedInPage.locator('[data-test="title"]')).toHaveText('Your Cart');
+        // Cancel checkout
+        await checkoutPage.cancelCheckout();
+
+        // Check that user returned to Cart
+        await expect(cartPage.title).toHaveText('Your Cart');
     });
 
     test('Clicking cancel in Checkout Overview page takes user back to Product page', async ({ loggedInPage }) => {
-        // Add that item to cart
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+        const productsPage = new ProductsPage(loggedInPage);
 
-        // Reach Checkout and click Cancel
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await completeCheckoutInformation(loggedInPage);
-        await loggedInPage.locator('[data-test="cancel"]').click();
+        await productsPage.addBackpackToCart();
+
+        await cartPage.openCart();
+        await cartPage.startCheckout();
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
+        await checkoutPage.cancelCheckout();
 
         // Check that we are back to the Products page
-        await expect(loggedInPage.locator('[data-test="title"]')).toHaveText('Products');
+        await expect(productsPage.title).toHaveText('Products');
     });
 
     test('Checkout displays product information matching Product page', async ({ loggedInPage }) => {
-        // Add an item to Cart and save product information
-        const sauceLabsBackpack = loggedInPage.locator('[data-test="inventory-item"]').filter({ hasText: 'Sauce Labs Backpack' });
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
+        const productsPage = new ProductsPage(loggedInPage);
+
+        // Save product information from Product page
+        const sauceLabsBackpack = productsPage.inventoryItems.filter({
+            hasText: 'Sauce Labs Backpack'
+        });
+
         const productName = await sauceLabsBackpack.locator('[data-test="inventory-item-name"]').innerText();
         const productDescription = await sauceLabsBackpack.locator('[data-test="inventory-item-desc"]').innerText();
         const productPrice = await sauceLabsBackpack.locator('[data-test="inventory-item-price"]').innerText();
 
-        // Add that item to cart
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+        await productsPage.addBackpackToCart();
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
-        // Reach Checkout
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
-        await completeCheckoutInformation(loggedInPage);
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
 
-        // Confirm Checkout item details matches the Product page details
-        await expect(loggedInPage.locator('[data-test="inventory-item-name"]')).toHaveText(productName);
-        await expect(loggedInPage.locator('[data-test="inventory-item-desc"]')).toHaveText(productDescription);
-        await expect(loggedInPage.locator('[data-test="inventory-item-price"]')).toHaveText(productPrice);
+        // Confirm Checkout details match Product page details
+        await expect(checkoutPage.productNames).toHaveText(productName);
+        await expect(checkoutPage.productDescriptions).toHaveText(productDescription);
+        await expect(checkoutPage.productPrices).toHaveText(productPrice);
     });
 
     test('User can checkout successfully and complete an order', async ({ loggedInPage }) => {
-        // Add item to cart and go to Cart page
-        await loggedInPage.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-        await loggedInPage.locator('[data-test="shopping-cart-link"]').click();
+        const productsPage = new ProductsPage(loggedInPage);
+        const cartPage = new CartPage(loggedInPage);
+        const checkoutPage = new CheckoutPage(loggedInPage);
 
-        // Fill in user information and continue to Checkout page
-        await completeCheckoutInformation(loggedInPage);
+        await productsPage.addBackpackToCart();
+        await cartPage.openCart();
+        await cartPage.startCheckout();
 
-        // Finish checkout
-        await loggedInPage.locator('[data-test="finish"]').click();
+        await checkoutPage.completeCheckoutInformation('Test', 'User', 'A1A 1A1');
+        await checkoutPage.continueToOverview();
 
-        await expect(loggedInPage.locator('[data-test="title"]')).toHaveText('Checkout: Complete!');
-        await expect(loggedInPage.locator('[data-test="complete-header"]')).toHaveText('Thank you for your order!');
-        await expect(loggedInPage.locator('[data-test="pony-express"]')).toBeVisible();
+        await checkoutPage.finishCheckout();
+
+        // Verify order completion
+        await expect(checkoutPage.title).toHaveText('Checkout: Complete!');
+        await expect(checkoutPage.completeHeader).toHaveText('Thank you for your order!');
+        await expect(checkoutPage.ponyExpressImage).toBeVisible();
     });
 });

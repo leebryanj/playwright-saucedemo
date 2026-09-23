@@ -124,8 +124,7 @@ test.describe('Cart', () => {
         await expect(loggedInPage.locator('[data-test="shopping-cart-badge"]')).toHaveText('2');
     });
 
-    test('Cart count updates when items are removed from Cart', async ({ loggedInPage }) => {
-        const cartPage = new CartPage(loggedInPage);
+    test('Cart badge updates when items are removed on the Products page', async ({ loggedInPage }) => {
         const productsPage = new ProductsPage(loggedInPage);
         // Add 3 items to the cart
         await productsPage.addBackpackToCart();
@@ -140,7 +139,7 @@ test.describe('Cart', () => {
         await expect(loggedInPage.locator('[data-test="shopping-cart-badge"]')).toHaveText('2');
         await loggedInPage.locator('[data-test="remove-sauce-labs-bike-light"]').click();
         await expect(loggedInPage.locator('[data-test="shopping-cart-badge"]')).toHaveText('1');
-        await cartPage.removeBackpack();
+        await productsPage.removeBackpack()
         await expect(loggedInPage.locator('[data-test="shopping-cart-badge"]')).not.toBeVisible();
     });
 });

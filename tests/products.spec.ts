@@ -52,8 +52,18 @@ test.describe('Product Page', () => {
 
     test('Products can be sorted from A to Z', async ({ loggedInPage }) => {
         const productsPage = new ProductsPage(loggedInPage);
+        // Sort from Z to A first to ensure the sort is working
+        await productsPage.sortByNameZA();
+        await expect(productsPage.productNames).toHaveText([
+            'Test.allTheThings() T-Shirt (Red)',
+            'Sauce Labs Onesie',
+            'Sauce Labs Fleece Jacket',
+            'Sauce Labs Bolt T-Shirt',
+            'Sauce Labs Bike Light',
+            'Sauce Labs Backpack'
+        ]);
+        // Now sort from A to Z to check the order
         await productsPage.sortByNameAZ();
-
         await expect(productsPage.productNames).toHaveText([
             'Sauce Labs Backpack',
             'Sauce Labs Bike Light',

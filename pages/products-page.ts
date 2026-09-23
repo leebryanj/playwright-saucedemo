@@ -44,4 +44,8 @@ export class ProductsPage {
             .locator('[data-test="add-to-cart-sauce-labs-bolt-t-shirt"]')
             .click();
     }
+
+    async removeBackpack() {
+        await this.page.locator('[data-test="remove-sauce-labs-backpack"]').click();
+    }
 }
